@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Гостевая книга</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div style="text-align: right; margin-bottom: 20px;">
+        {% if is_admin %}
+            <span style="color: #28a745; font-weight: bold; margin-right: 15px;">Режим Администратора</span>
+            <a href="/logout" style="color: #dc3545; font-weight: bold; text-decoration: none;">Выйти</a>
+        {% else %}
+            <a href="/login" style="color: #007bff; font-weight: bold; text-decoration: none;">🔒 Войти как админ</a>
+        {% endif %}
+    </div>
+
+    <h1>📖 Гостевая книга</h1>
+    <p>Всего отзывов: <strong>{{ count }}</strong></p>
+
+    <div class="form-box">
+        <h3>Оставить сообщение</h3>
+        {% if error %}
+            <p class="error-msg">Ошибка: Заполните все поля!</p>
+        {% endif %}
+        <form action="/add" method="POST" novalidate>
+            <div class="form-group">
+                <label>Ваше имя:</label>
+                <input type="text" name="name" value="{{ old_name }}" class="{% if error and not old_name %}input-error{% endif %}">
+            </div>
+            <div class="form-group">
+                <label>Сообщение:</label>
+                <textarea name="message" rows="4" class="{% if error and not old_message %}input-error{% endif %}">{{ old_message }}</textarea>
+            </div>
+            <button type="submit" class="btn">Отправить</button>
+        </form>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; max-width: 500px; align-items: center;">
+        <h2>Сообщения</h2>
+        {% if messages and is_admin %}
+            <a href="/delete-all-confirm" style="color: #dc3545; font-weight: bold; text-decoration: none;">🗑️ Очистить всё</a>
+        {% endif %}
+    </div>
+
+    <div class="messages-list">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="msg-card">
+                    <div class="msg-header">
+                        <span class="msg-author">{{ msg['name'] }}</span>
+                        <div>
+                            <span>{{ msg['created_at'] }}</span>
+                            {% if is_admin %}
+                                <a href="/delete/{{ msg['id'] }}" onclick="return confirm('Удалить?');" style="color: #dc3545; text-decoration: none; margin-left: 15px; font-weight: bold;">×</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="msg-text">{{ msg['message'] }}</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Пока нет сообщений.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
